@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>استبيان حجم المستخدمين - ERP المبسطة | تكاليف</title>
+    <!-- Bootstrap RTL -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- SheetJS -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+    <!-- html2canvas -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <!-- jsPDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+            background: linear-gradient(135deg, #1e4a3b 0%, #2d6a4e 100%);
+            min-height: 100vh;
+            color: #1e3a3a;
+            padding: 20px;
+        }
+        
+        .main-header {
+            background: linear-gradient(135deg, #0e3b2c 0%, #1b5e3f 100%);
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+            border-radius: 0 0 50px 50px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            border-bottom: 3px solid #52b788;
+        }
+        
+        .company-badge {
+            background: rgba(82, 183, 136, 0.3);
+            padding: 0.5rem 1.5rem;
+            border-radius: 50px;
+            display: inline-block;
+            font-weight: 600;
+            border: 1px solid #52b788;
+            color: white;
+        }
+        
+        .card {
+            border: none;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            transition: transform 0.3s ease;
+            margin-bottom: 2rem;
+            background-color: #f8faf8;
+            border: 1px solid #e4f2e4;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .card-header {
+            background: linear-gradient(135deg, #1e4a3b 0%, #2d6a4e 100%);
+            color: white;
+            border-radius: 20px 20px 0 0 !important;
+            padding: 1rem 2rem;
+            font-weight: 600;
+            border-bottom: 2px solid #52b788;
+        }
+        
+        .btn-custom {
+            background: #52b788;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 50px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: 1px solid #1e4a3b;
+        }
+        
+        .btn-custom:hover {
+            background: #2d6a4e;
+            transform: scale(1.05);
+            color: white;
+            box-shadow: 0 5px 20px rgba(82, 183, 136, 0.4);
+        }
+        
+        .btn-excel {
+            background: #1e4a3b;
+            color: white;
+            border: 2px solid #52b788;
+        }
+        
+        .btn-excel:hover {
+            background: #2d6a4e;
+            color: white;
+        }
+        
+        .btn-pdf {
+            background: #4a6b5a;
+            color: white;
+            border: 2px solid #52b788;
+        }
+        
+        .btn-pdf:hover {
+            background: #1e4a3b;
+            color: white;
+        }
+        
+        .form-label {
+            color: #2d6a4e;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        
+        .form-control, .form-select {
+            border: 2px solid #e4f2e4;
+            border-radius: 10px;
+            padding: 0.75rem;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: #52b788;
+            box-shadow: 0 0 0 0.2rem rgba(82, 183, 136, 0.25);
+        }
+        
+        .data-entry-section {
+            background: #f0f7f0;
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 3px solid #52b788;
+        }
+        
+        .client-info-card {
+            background: linear-gradient(135deg, #f8faf8 0%, #ffffff 100%);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border: 2px solid #52b788;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+        }
+        
+        .client-info-title {
+            color: #1e4a3b;
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .client-info-title i {
+            color: #52b788;
+            margin-left: 10px;
+            font-size: 1.5rem;
+        }
+        
+        .required-field::after {
+            content: "*";
+            color: #dc3545;
+            margin-right: 4px;
+        }
+        
+        .footer {
+            background: linear-gradient(135deg, #0e3b2c 0%, #1b5e3f 100%);
+            color: white;
+            padding: 3rem 0 1.5rem;
+            margin-top: 3rem;
+            border-radius: 50px 50px 0 0;
+            border-top: 3px solid #52b788;
+        }
+        
+        .footer-links {
+            color: #e4f2e4;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .footer-links:hover {
+            color: #52b788;
+            padding-right: 5px;
+        }
+        
+        .contact-item {
+            margin-bottom: 10px;
+            color: #e4f2e4;
+        }
+        
+        .contact-item i {
+            color: #52b788;
+            margin-left: 10px;
+            width: 20px;
+        }
+        
+        .social-icon {
+            width: 40px;
+            height: 40px;
+            background: rgba(82, 183, 136, 0.2);
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 5px;
+            color: #52b788;
+            transition: all 0.3s ease;
+            border: 1px solid #52b788;
+        }
+        
+        .social-icon:hover {
+            background: #52b788;
+            color: #0e3b2c;
+            transform: translateY(-3px);
+        }
+        
+        .nav-tabs-custom {
+            border-bottom: 3px solid #52b788;
+            margin-bottom: 2rem;
+            background: linear-gradient(135deg, #1e4a3b 0%, #2d6a4e 100%);
+            border-radius: 50px;
+            padding: 0.5rem;
+        }
+        
+        .nav-tabs-custom .nav-link {
+            color: white !important;
+            font-weight: 600;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-tabs-custom .nav-link i {
+            color: white;
+        }
+        
+        .nav-tabs-custom .nav-link.active {
+            color: #1e4a3b !important;
+            background: #52b788;
+            border: 2px solid white;
+        }
+        
+        .nav-tabs-custom .nav-link.active i {
+            color: #1e4a3b;
+        }
+        
+        .preview-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            border: 2px solid #52b788;
+            margin-bottom: 1.5rem;
+        }
+        
+        .preview-item {
+            padding: 0.75rem 0;
+            border-bottom: 1px dashed #e4f2e4;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+        
+        .preview-label {
+            font-weight: 600;
+            color: #1e4a3b;
+            width: 45%;
+        }
+        
+        .preview-value {
+            color: #2d6a4e;
+            width: 55%;
+            text-align: left;
+        }
+        
+        .user-group-item {
+            background: #f8faf8;
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border: 1px solid #e4f2e4;
+        }
+        
+        .badge-custom {
+            background: #52b788;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+        }
+        
+        /* PDF Export Container */
+        #pdf-export-container {
+            position: fixed;
+            top: -99999px;
+            left: -99999px;
+            width: 800px;
+            background: white;
+            z-index: 9999;
+            padding: 30px;
+            opacity: 0;
+            pointer-events: none;
+            font-family: 'Cairo', sans-serif;
+        }
+        
+        .pdf-wrapper {
+            background: white;
+            padding: 20px;
+            border-radius: 20px;
+            direction: rtl;
+        }
+        
+        .pdf-cover {
+            background: linear-gradient(135deg, #0e3b2c 0%, #1b5e3f 100%);
+            color: white;
+            padding: 40px 30px;
+            border-radius: 30px;
+            margin-bottom: 30px;
+            border: 4px solid #52b788;
+            text-align: center;
+        }
+        
+        .pdf-section-title {
+            color: #1e4a3b;
+            font-size: 20px;
+            font-weight: 800;
+            margin: 30px 0 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #52b788;
+        }
+        
+        .pdf-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 12px;
+            border: 1px solid #52b788;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .pdf-table th {
+            background: #1e4a3b;
+            color: white;
+            padding: 10px 8px;
+            font-weight: 700;
+            text-align: center;
+            font-size: 12px;
+        }
+        
+        .pdf-table td {
+            padding: 8px;
+            border: 1px solid #e4f2e4;
+            text-align: center;
+            font-size: 11px;
+        }
+        
+        .pdf-footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            background: linear-gradient(135deg, #0e3b2c 0%, #1b5e3f 100%);
+            color: white;
+            border-radius: 15px;
+            border: 2px solid #52b788;
+        }
+        
+        .user-stats-card {
+            background: linear-gradient(135deg, #e8f5e9 0%, #ffffff 100%);
+            border-radius: 15px;
+            padding: 1rem;
+            text-align: center;
+            border: 1px solid #52b788;
+        }
+        
+        .user-stat-number {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #1e4a3b;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="main-header text-center no-print">
+        <div class="container">
+            <span class="company-badge mb-3">تكاليف | حلول أعمال ذكية</span>
+            <h1 class="display-4 fw-bold mt-3" style="color: white;">
+                <i class="fas fa-users me-3"></i>
+                استبيان حجم المستخدمين
+            </h1>
+            <p class="lead" style="color: white;">خدمة حلول ERP المبسطة - تحليل احتياجات المستخدمين وتحديد نطاق النظام</p>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Tabs -->
+        <ul class="nav nav-tabs-custom nav-fill" id="myTab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="data-entry-tab" data-bs-toggle="tab" data-bs-target="#dataEntry" type="button" role="tab">
+                    <i class="fas fa-edit me-2"></i> استبيان المعلومات
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="preview-tab" data-bs-toggle="tab" data-bs-target="#preview" type="button" role="tab">
+                    <i class="fas fa-eye me-2"></i> معاينة التقرير
+                </button>
+            </li>
+        </ul>
+
+        <div class="tab-content">
+            <!-- Tab 1: Data Entry -->
+            <div class="tab-pane fade show active" id="dataEntry" role="tabpanel">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-users me-2"></i> استبيان حجم المستخدمين - ERP المبسطة
+                    </div>
+                    <div class="card-body">
+                        <!-- بيانات المنشأة -->
+                        <div class="client-info-card">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="client-info-title"><i class="fas fa-building"></i> بيانات المنشأة</div>
+                                    <div class="mb-3"><label class="form-label required-field">اسم المنشأة</label><input type="text" class="form-control" id="companyName" placeholder="أدخل اسم المنشأة"></div>
+                                    <div class="mb-3"><label class="form-label">النشاط الرئيسي</label><input type="text" class="form-control" id="businessActivity" placeholder="مثال: تصنيع / تجارة / خدمات"></div>
+                                    <div class="mb-3"><label class="form-label">حجم المنشأة</label><select class="form-select" id="companySize"><option value="">اختر...</option><option value="صغيرة (أقل من 50 موظف)">صغيرة (أقل من 50 موظف)</option><option value="متوسطة (50-250 موظف)">متوسطة (50-250 موظف)</option><option value="كبيرة (أكثر من 250 موظف)">كبيرة (أكثر من 250 موظف)</option></select></div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="client-info-title"><i class="fas fa-address-card"></i> بيانات المسؤول</div>
+                                    <div class="mb-3"><label class="form-label required-field">اسم المسؤول عن التقييم</label><input type="text" class="form-control" id="contactPerson" placeholder="أدخل اسم المسؤول"></div>
+                                    <div class="mb-3"><label class="form-label required-field">المسمى الوظيفي</label><input type="text" class="form-control" id="jobTitle" placeholder="مثال: مدير تقنية المعلومات"></div>
+                                    <div class="mb-3"><label class="form-label required-field">البريد الإلكتروني</label><input type="email" class="form-control" id="clientEmail" placeholder="example@company.com"></div>
+                                </div>
+                            </div>
+                            <div class="row mt-3">
+                                <div class="col-md-4"><div class="mb-3"><label class="form-label">رقم الهاتف</label><input type="tel" class="form-control" id="clientPhone" placeholder="رقم الهاتف"></div></div>
+                                <div class="col-md-4"><div class="mb-3"><label class="form-label">تاريخ التعبئة</label><input type="date" class="form-control" id="submissionDate" value="2026-03-30"></div></div>
+                                <div class="col-md-4"><div class="mb-3"><label class="form-label">العملة المستخدمة</label><select class="form-select" id="currencySelect"><option value="EGP" selected>جنيه مصري (EGP)</option><option value="SAR">ريال سعودي (SAR)</option><option value="AED">درهم إماراتي (AED)</option><option value="USD">دولار أمريكي (USD)</option></select></div></div>
+                            </div>
+                        </div>
+
+                        <!-- القسم الأول: إجمالي عدد المستخدمين -->
+                        <div class="data-entry-section">
+                            <h4 class="mb-4" style="color: #1e4a3b;"><i class="fas fa-chart-pie me-2"></i> القسم الأول: إجمالي عدد المستخدمين</h4>
+                            <div class="row">
+                                <div class="col-md-4"><div class="mb-3"><label class="form-label">إجمالي عدد المستخدمين المتوقع</label><input type="number" class="form-control" id="totalUsers" placeholder="مثال: 50"></div></div>
+                                <div class="col-md-4"><div class="mb-3"><label class="form-label">الحد الأقصى المتزامن للمستخدمين</label><input type="number" class="form-control" id="concurrentUsers" placeholder="مثال: 20"></div></div>
+                                <div class="col-md-4"><div class="mb-3"><label class="form-label">عدد المستخدمين في السنة الأولى</label><input type="number" class="form-control" id="firstYearUsers" placeholder="مثال: 30"></div></div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12"><div class="mb-3"><label class="form-label">نمو المستخدمين المتوقع سنوياً (%)</label><input type="number" class="form-control" id="userGrowth" placeholder="مثال: 10"></div></div>
+                            </div>
+                        </div>
+
+                        <!-- القسم الثاني: توزيع المستخدمين حسب الإدارات -->
+                        <div class="data-entry-section">
+                            <h4 class="mb-4" style="color: #1e4a3b;"><i class="fas fa-building me-2"></i> القسم الثاني: توزيع المستخدمين حسب الإدارات</h4>
+                            <div class="row">
+                                <div class="col-md-4"><div class="mb-3"><label class="form-label">الإدارة المالية والمحاسبة</label><input type="number" class="form-control" id="deptFinance" placeholder="عدد المستخدمين"></div></div>
+                                <div class="col-md-4"><div class="mb-3"><label class="form-label">المشتريات والموردين</label><input type="number" class="form-control" id="deptPurchases" placeholder="عدد المستخدمين"></div></div>
+                                <div class="col-md-4"><div class="mb-3"><label class="form-label">المبيعات والعملاء</label><input type="number" class="form-control" id="deptSales" placeholder="عدد المستخدمين"></div></div>
+                                <div class="col-md-4"><div class="mb-3"><label class="form-label">المخزون والمستودعات</label><input type="number" class="form-control" id="deptInventory" placeholder="عدد المستخدمين"></div></div>
+                                <div class="col-md-4"><div class="mb-3"><label class="form-label">الموارد البشرية</label><input type="number" class="form-control" id="deptHR" placeholder="عدد المستخدمين"></div></div>
+                                <div class="col-md-4"><div class="mb-3"><label class="form-label">الإنتاج والتصنيع</label><input type="number" class="form-control" id="deptProduction" placeholder="عدد المستخدمين"></div></div>
+                                <div class="col-md-4"><div class="mb-3"><label class="form-label">تقنية المعلومات</label><input type="number" class="form-control" id="deptIT" placeholder="عدد المستخدمين"></div></div>
+                                <div class="col-md-4"><div class="mb-3"><label class="form-label">إدارة المشاريع</label><input type="number" class="form-control" id="deptProjects" placeholder="عدد المستخدمين"></div></div>
+                                <div class="col-md-4"><div class="mb-3"><label class="form-label">الإدارة العليا</label><input type="number" class="form-control" id="deptManagement" placeholder="عدد المستخدمين"></div></div>
+                            </div>
+                            <div class="row mt-3">
+                                <div class="col-md-12"><div class="mb-3"><label class="form-label">إدارات أخرى</label><textarea class="form-control" id="otherDepartments" rows="2" placeholder="اذكر إدارات أخرى وعدد المستخدمين فيها"></textarea></div></div>
+                            </div>
+                        </div>
+
+                        <!-- القسم الثالث: مستويات الصلاحيات -->
+                        <div class="data-entry-section">
+                            <h4 class="mb-4" style="color: #1e4a3b;"><i class="fas fa-lock me-2"></i> القسم الثالث: مستويات الصلاحيات المطلوبة</h4>
+                            <div class="row">
+                                <div class="col-md-12"><label class="form-label">أنواع المستخدمين المطلوبة</label></div>
+                                <div class="col-md-3"><div class="form-check mb-2"><input class="form-check-input" type="checkbox" id="userTypeAdmin" value="مدير النظام (Admin)"><label class="form-check-label" for="userTypeAdmin">مدير النظام (Admin)</label></div></div>
+                                <div class="col-md-3"><div class="form-check mb-2"><input class="form-check-input" type="checkbox" id="userTypeManager" value="مدراء (صلاحيات كاملة على إدارتهم)"><label class="form-check-label" for="userTypeManager">مدراء (صلاحيات كاملة على إدارتهم)</label></div></div>
+                                <div class="col-md-3"><div class="form-check mb-2"><input class="form-check-input" type="checkbox" id="userTypeSupervisor" value="مشرفين (صلاحيات محدودة)"><label class="form-check-label" for="userTypeSupervisor">مشرفين (صلاحيات محدودة)</label></div></div>
+                                <div class="col-md-3"><div class="form-check mb-2"><input class="form-check-input" type="checkbox" id="userTypeUser" value="مستخدمين عاديين (صلاحيات أساسية)"><label class="form-check-label" for="userTypeUser">مستخدمين عاديين (صلاحيات أساسية)</label></div></div>
+                                <div class="col-md-3"><div class="form-check mb-2"><input class="form-check-input" type="checkbox" id="userTypeViewer" value="مستخدمين للعرض فقط (View Only)"><label class="form-check-label" for="userTypeViewer">مستخدمين للعرض فقط (View Only)</label></div></div>
+                                <div class="col-md-3"><div class="form-check mb-2"><input class="form-check-input" type="checkbox" id="userTypeExternal" value="مستخدمين خارجيين (موردين/عملاء)"><label class="form-check-label" for="userTypeExternal">مستخدمين خارجيين (موردين/عملاء)</label></div></div>
+                            </div>
+                            <div class="row mt-3">
+                                <div class="col-md-12"><div class="mb-3"><label class="form-label">متطلبات صلاحيات إضافية</label><textarea class="form-control" id="additionalPermissions" rows="2" placeholder="اذكر أي متطلبات خاصة للصلاحيات"></textarea></div></div>
+                            </div>
+                        </div>
+
+                        <!-- القسم الرابع: احتياجات التدريب والدعم -->
+                        <div class="data-entry-section">
+                            <h4 class="mb-4" style="color: #1e4a3b;"><i class="fas fa-chalkboard-user me-2"></i> القسم الرابع: احتياجات التدريب والدعم</h4>
+                            <div class="row">
+                                <div class="col-md-6"><div class="mb-3"><label class="form-label">مستوى خبرة المستخدمين الحالي</label><select class="form-select" id="userExperience"><option value="">اختر...</option><option value="مبتدئ (لا توجد خبرة)">مبتدئ (لا توجد خبرة)</option><option value="متوسط (خبرة محدودة)">متوسط (خبرة محدودة)</option><option value="متقدم (خبرة جيدة)">متقدم (خبرة جيدة)</option><option value="خبير (خبرة عالية)">خبير (خبرة عالية)</option></select></div></div>
+                                <div class="col-md-6"><div class="mb-3"><label class="form-label">نوع التدريب المطلوب</label><select class="form-select" id="trainingType"><option value="">اختر...</option><option value="تدريب عن بعد">تدريب عن بعد</option><option value="تدريب حضوري">تدريب حضوري</option><option value="تدريب مختلط">تدريب مختلط</option><option value="دليل استخدام مكتوب">دليل استخدام مكتوب</option></select></div></div>
+                                <div class="col-md-6"><div class="mb-3"><label class="form-label">مدة التدريب المقترحة</label><select class="form-select" id="trainingDuration"><option value="">اختر...</option><option value="يوم واحد">يوم واحد</option><option value="2-3 أيام">2-3 أيام</option><option value="أسبوع">أسبوع</option><option value="أسبوعين">أسبوعين</option></select></div></div>
+                                <div class="col-md-6"><div class="mb-3"><label class="form-label">مستوى الدعم الفني المطلوب</label><select class="form-select" id="supportLevel"><option value="">اختر...</option><option value="دعم أساسي (ساعات العمل)">دعم أساسي (ساعات العمل)</option><option value="دعم ممتد (8-12 ساعة)">دعم ممتد (8-12 ساعة)</option><option value="دعم على مدار الساعة">دعم على مدار الساعة</option><option value="دعم ميداني">دعم ميداني</option></select></div></div>
+                            </div>
+                        </div>
+
+                        <!-- القسم الخامس: احتياجات وصول وتواجد المستخدمين -->
+                        <div class="data-entry-section">
+                            <h4 class="mb-4" style="color: #1e4a3b;"><i class="fas fa-globe me-2"></i> القسم الخامس: احتياجات وصول وتواجد المستخدمين</h4>
+                            <div class="row">
+                                <div class="col-md-6"><div class="mb-3"><label class="form-label">طريقة الوصول المطلوبة</label><select class="form-select" id="accessMethod"><option value="">اختر...</option><option value="مكتبي فقط (داخل الشبكة الداخلية)">مكتبي فقط (داخل الشبكة الداخلية)</option><option value="عن بعد (Remote Access)">عن بعد (Remote Access)</option><option value="جوال وتطبيق موبايل">جوال وتطبيق موبايل</option><option value="جميع الطرق">جميع الطرق</option></select></div></div>
+                                <div class="col-md-6"><div class="mb-3"><label class="form-label">عدد الفروع أو المواقع</label><input type="number" class="form-control" id="branchesCount" placeholder="مثال: 3 فروع"></div></div>
+                                <div class="col-md-12"><div class="mb-3"><label class="form-label">مواقع المستخدمين (مدن/دول مختلفة)</label><textarea class="form-control" id="userLocations" rows="2" placeholder="اذكر المدن أو الدول التي يتواجد فيها المستخدمون"></textarea></div></div>
+                                <div class="col-md-12"><div class="mb-3"><label class="form-label">دوام العمل للمستخدمين</label><select class="form-select" id="workShift"><option value="">اختر...</option><option value="دوام واحد (8 ساعات)">دوام واحد (8 ساعات)</option><option value="دوام متعدد (ورديات)">دوام متعدد (ورديات)</option><option value="عمل عن بعد بمرونة">عمل عن بعد بمرونة</option><option value="دوام جزئي">دوام جزئي</option></select></div></div>
+                            </div>
+                        </div>
+
+                        <!-- القسم السادس: مجموعات مستخدمين إضافية (ديناميكي) -->
+                        <div class="data-entry-section">
+                            <h4 class="mb-4" style="color: #1e4a3b;"><i class="fas fa-plus-circle me-2"></i> القسم السادس: مجموعات مستخدمين إضافية</h4>
+                            <div id="userGroupsContainer"></div>
+                            <button class="btn btn-custom btn-sm mt-2" onclick="addUserGroup()"><i class="fas fa-plus-circle me-1"></i> إضافة مجموعة مستخدمين</button>
+                        </div>
+
+                        <!-- القسم السابع: معلومات إضافية -->
+                        <div class="data-entry-section">
+                            <h4 class="mb-4" style="color: #1e4a3b;"><i class="fas fa-info-circle me-2"></i> القسم السابع: معلومات إضافية</h4>
+                            <div class="row">
+                                <div class="col-md-12"><div class="mb-3"><label class="form-label">أي معلومات إضافية حول احتياجات المستخدمين</label><textarea class="form-control" id="additionalInfo" rows="3" placeholder="أي معلومات إضافية"></textarea></div></div>
+                            </div>
+                        </div>
+
+                        <div class="text-center mt-4">
+                            <button class="btn btn-custom btn-lg" onclick="refreshPreview()"><i class="fas fa-sync-alt me-2"></i> تحديث المعاينة</button>
+                            <button class="btn btn-custom btn-lg mx-2" onclick="resetForm()"><i class="fas fa-undo me-2"></i> إعادة تعيين</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 2: Preview -->
+            <div class="tab-pane fade" id="preview" role="tabpanel">
+                <div class="card">
+                    <div class="card-header"><i class="fas fa-file-alt me-2"></i> معاينة تقرير حجم المستخدمين</div>
+                    <div class="card-body" id="previewContent"></div>
+                </div>
+                <div class="text-center mb-4 no-print">
+                    <button class="btn btn-excel btn-lg mx-2" onclick="exportToExcel()"><i class="fas fa-file-excel me-2"></i> تصدير (Excel)</button>
+                    <button class="btn btn-pdf btn-lg mx-2" onclick="exportToPDF(event)"><i class="fas fa-file-pdf me-2"></i> تصدير التقرير (PDF)</button>
+                    <button class="btn btn-custom btn-lg mx-2" onclick="window.print()"><i class="fas fa-print me-2"></i> طباعة</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer no-print">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4 mb-4"><h5 style="color: #52b788;">تكاليف - حلول أعمال ذكية</h5><p style="color: #e4f2e4;">نقدم خدمات حلول ERP المبسطة وتحليل احتياجات المستخدمين.</p></div>
+                <div class="col-md-4 mb-4"><h5 style="color: #52b788;"><i class="fas fa-address-card me-2"></i>معلومات الاتصال</h5><div class="contact-item"><i class="fas fa-map-marker-alt"></i> القاهرة - مصر</div><div class="contact-item"><i class="fas fa-phone-alt"></i><a href="tel:+201044391177" class="footer-links">+20 104 439 1177</a></div><div class="contact-item"><i class="fas fa-envelope"></i><a href="mailto:info@takalief.com" class="footer-links">info@takalief.com</a></div><div class="contact-item"><i class="fas fa-globe"></i><a href="https://www.takalief.com" class="footer-links" target="_blank">www.takalief.com</a></div></div>
+                <div class="col-md-4 mb-4"><h5 style="color: #52b788;"><i class="fas fa-share-alt me-2"></i>تابعنا على</h5><div class="text-center"><a href="#" class="social-icon"><i class="fab fa-facebook-f"></i></a><a href="#" class="social-icon"><i class="fab fa-twitter"></i></a><a href="#" class="social-icon"><i class="fab fa-linkedin-in"></i></a><a href="#" class="social-icon"><i class="fab fa-instagram"></i></a><a href="#" class="social-icon"><i class="fab fa-youtube"></i></a><a href="#" class="social-icon"><i class="fab fa-whatsapp"></i></a></div></div>
+            </div>
+            <hr>
+            <div class="row mt-3"><div class="col-md-6 text-md-start text-center"><p class="mb-0" style="color: #e4f2e4;"><i class="fas fa-copyright me-2" style="color: #52b788;"></i>2026 تكاليف - حلول أعمال ذكية. جميع الحقوق محفوظة</p></div><div class="col-md-6 text-md-end text-center"><a href="#" class="footer-links me-3">سياسة الخصوصية</a><a href="#" class="footer-links me-3">شروط الاستخدام</a><a href="#" class="footer-links">الدعم الفني</a></div></div>
+        </div>
+    </footer>
+
+    <div id="pdf-export-container"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        let userGroupCount = 1;
+        let selectedCurrency = 'EGP';
+        const currencySymbols = { 'EGP': 'جنيه', 'SAR': 'ريال', 'AED': 'درهم', 'USD': 'دولار' };
+        const currencyNames = { 'EGP': 'جنيه مصري', 'SAR': 'ريال سعودي', 'AED': 'درهم إماراتي', 'USD': 'دولار أمريكي' };
+        
+        document.getElementById('currencySelect').addEventListener('change', function() {
+            selectedCurrency = this.value;
+            refreshPreview();
+        });
+        
+        function addUserGroup() {
+            userGroupCount++;
+            const container = document.getElementById('userGroupsContainer');
+            const newGroup = document.createElement('div');
+            newGroup.className = 'user-group-item';
+            newGroup.id = `userGroup-${userGroupCount}`;
+            newGroup.innerHTML = `
+                <div class="row mb-2">
+                    <div class="col-md-4">
+                        <input type="text" class="form-control" placeholder="اسم المجموعة / الإدارة" id="groupName${userGroupCount}">
+                    </div>
+                    <div class="col-md-3">
+                        <input type="number" class="form-control" placeholder="عدد المستخدمين" id="groupCount${userGroupCount}">
+                    </div>
+                    <div class="col-md-4">
+                        <select class="form-select" id="groupAccess${userGroupCount}">
+                            <option value="">مستوى الوصول</option>
+                            <option value="صلاحيات كاملة">صلاحيات كاملة</option>
+                            <option value="صلاحيات متوسطة">صلاحيات متوسطة</option>
+                            <option value="صلاحيات محدودة">صلاحيات محدودة</option>
+                            <option value="عرض فقط">عرض فقط</option>
+                        </select>
+                    </div>
+                    <div class="col-md-1">
+                        <button class="btn btn-danger btn-sm" onclick="removeUserGroup(${userGroupCount})"><i class="fas fa-trash"></i></button>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <textarea class="form-control" rows="2" placeholder="الوحدات الوظيفية التي يحتاجها这群 المستخدمين" id="groupModules${userGroupCount}"></textarea>
+                    </div>
+                </div>
+            `;
+            container.appendChild(newGroup);
+            refreshPreview();
+        }
+        
+        function removeUserGroup(id) {
+            if (userGroupCount > 1) {
+                const element = document.getElementById(`userGroup-${id}`);
+                if (element) element.remove();
+                refreshPreview();
+            } else {
+                alert("لا يمكن حذف المجموعة الوحيدة المتبقية");
+            }
+        }
+        
+        function getUserGroupsList() {
+            let html = '';
+            for (let i = 1; i <= userGroupCount; i++) {
+                const nameElem = document.getElementById(`groupName${i}`);
+                const name = nameElem ? nameElem.value : '';
+                if (name) {
+                    const count = document.getElementById(`groupCount${i}`) ? document.getElementById(`groupCount${i}`).value : '';
+                    const access = document.getElementById(`groupAccess${i}`) ? document.getElementById(`groupAccess${i}`).options[document.getElementById(`groupAccess${i}`).selectedIndex]?.text : '';
+                    const modules = document.getElementById(`groupModules${i}`) ? document.getElementById(`groupModules${i}`).value : '';
+                    html += `<div class="preview-item"><span class="preview-label"><strong>${name}</strong><br><small>العدد: ${count || 'غير محدد'} | مستوى الوصول: ${access || 'غير محدد'}</small></span><span class="preview-value">الوحدات المطلوبة: ${modules || 'غير محددة'}</span></div>`;
+                }
+            }
+            return html || '<div class="preview-item"><span class="preview-label">لا توجد مجموعات مستخدمين مضافة</span><span class="preview-value">—</span></div>';
+        }
+        
+        function getFieldValue(id, defaultValue = '—') {
+            const element = document.getElementById(id);
+            return element && element.value.trim() !== '' ? element.value.trim() : defaultValue;
+        }
+        
+        function getNumberValue(id, defaultValue = '—') {
+            const element = document.getElementById(id);
+            return element && element.value.trim() !== '' ? element.value : defaultValue;
+        }
+        
+        function getSelectText(id, defaultValue = '—') {
+            const select = document.getElementById(id);
+            if (select && select.options[select.selectedIndex] && select.options[select.selectedIndex].value !== '') {
+                return select.options[select.selectedIndex].text;
+            }
+            return defaultValue;
+        }
+        
+        function getUserTypesList() {
+            const types = [];
+            const typeIds = ['userTypeAdmin', 'userTypeManager', 'userTypeSupervisor', 'userTypeUser', 'userTypeViewer', 'userTypeExternal'];
+            typeIds.forEach(id => {
+                const element = document.getElementById(id);
+                if (element && element.checked) {
+                    types.push(element.value);
+                }
+            });
+            return types.length ? types.join('، ') : 'لم يتم اختيار أي نوع';
+        }
+        
+        function calculateTotalFromDepts() {
+            let total = 0;
+            const deptIds = ['deptFinance', 'deptPurchases', 'deptSales', 'deptInventory', 'deptHR', 'deptProduction', 'deptIT', 'deptProjects', 'deptManagement'];
+            deptIds.forEach(id => {
+                const val = document.getElementById(id)?.value;
+                if (val && !isNaN(parseInt(val))) total += parseInt(val);
+            });
+            return total;
+        }
+        
+        function refreshPreview() {
+            const totalUsers = getFieldValue('totalUsers');
+            const calculatedTotal = calculateTotalFromDepts();
+            const deptTotalDisplay = calculatedTotal > 0 ? ` (إجمالي محسوب: ${calculatedTotal})` : '';
+            
+            const previewHtml = `
+                <div class="preview-card"><h4 style="color: #1e4a3b;"><i class="fas fa-building me-2"></i>بيانات المنشأة</h4>
+                <div class="preview-item"><span class="preview-label">اسم المنشأة</span><span class="preview-value">${getFieldValue('companyName')}</span></div>
+                <div class="preview-item"><span class="preview-label">النشاط الرئيسي</span><span class="preview-value">${getFieldValue('businessActivity')}</span></div>
+                <div class="preview-item"><span class="preview-label">حجم المنشأة</span><span class="preview-value">${getSelectText('companySize')}</span></div>
+                <div class="preview-item"><span class="preview-label">المسؤول عن التقييم</span><span class="preview-value">${getFieldValue('contactPerson')}</span></div>
+                <div class="preview-item"><span class="preview-label">المسمى الوظيفي</span><span class="preview-value">${getFieldValue('jobTitle')}</span></div>
+                <div class="preview-item"><span class="preview-label">البريد الإلكتروني</span><span class="preview-value">${getFieldValue('clientEmail')}</span></div>
+                <div class="preview-item"><span class="preview-label">رقم الهاتف</span><span class="preview-value">${getFieldValue('clientPhone')}</span></div>
+                <div class="preview-item"><span class="preview-label">العملة</span><span class="preview-value">${currencyNames[selectedCurrency]}</span></div></div>
+                
+                <div class="preview-card"><h4 style="color: #1e4a3b;"><i class="fas fa-chart-pie me-2"></i>إجمالي عدد المستخدمين</h4>
+                <div class="preview-item"><span class="preview-label">إجمالي المستخدمين المتوقع</span><span class="preview-value">${totalUsers}</span></div>
+                <div class="preview-item"><span class="preview-label">الحد الأقصى المتزامن</span><span class="preview-value">${getFieldValue('concurrentUsers')}</span></div>
+                <div class="preview-item"><span class="preview-label">مستخدمي السنة الأولى</span><span class="preview-value">${getFieldValue('firstYearUsers')}</span></div>
+                <div class="preview-item"><span class="preview-label">نمو المستخدمين السنوي</span><span class="preview-value">${getFieldValue('userGrowth')} ${getFieldValue('userGrowth') !== '—' ? '%' : ''}</span></div></div>
+                
+                <div class="preview-card"><h4 style="color: #1e4a3b;"><i class="fas fa-building me-2"></i>توزيع المستخدمين حسب الإدارات${deptTotalDisplay}</h4>
+                <div class="preview-item"><span class="preview-label">الإدارة المالية والمحاسبة</span><span class="preview-value">${getNumberValue('deptFinance')}</span></div>
+                <div class="preview-item"><span class="preview-label">المشتريات والموردين</span><span class="preview-value">${getNumberValue('deptPurchases')}</span></div>
+                <div class="preview-item"><span class="preview-label">المبيعات والعملاء</span><span class="preview-value">${getNumberValue('deptSales')}</span></div>
+                <div class="preview-item"><span class="preview-label">المخزون والمستودعات</span><span class="preview-value">${getNumberValue('deptInventory')}</span></div>
+                <div class="preview-item"><span class="preview-label">الموارد البشرية</span><span class="preview-value">${getNumberValue('deptHR')}</span></div>
+                <div class="preview-item"><span class="preview-label">الإنتاج والتصنيع</span><span class="preview-value">${getNumberValue('deptProduction')}</span></div>
+                <div class="preview-item"><span class="preview-label">تقنية المعلومات</span><span class="preview-value">${getNumberValue('deptIT')}</span></div>
+                <div class="preview-item"><span class="preview-label">إدارة المشاريع</span><span class="preview-value">${getNumberValue('deptProjects')}</span></div>
+                <div class="preview-item"><span class="preview-label">الإدارة العليا</span><span class="preview-value">${getNumberValue('deptManagement')}</span></div>
+                <div class="preview-item"><span class="preview-label">إدارات أخرى</span><span class="preview-value">${getFieldValue('otherDepartments')}</span></div></div>
+                
+                <div class="preview-card"><h4 style="color: #1e4a3b;"><i class="fas fa-lock me-2"></i>مستويات الصلاحيات</h4>
+                <div class="preview-item"><span class="preview-label">أنواع المستخدمين</span><span class="preview-value">${getUserTypesList()}</span></div>
+                <div class="preview-item"><span class="preview-label">متطلبات صلاحيات إضافية</span><span class="preview-value">${getFieldValue('additionalPermissions')}</span></div></div>
+                
+                <div class="preview-card"><h4 style="color: #1e4a3b;"><i class="fas fa-chalkboard-user me-2"></i>احتياجات التدريب والدعم</h4>
+                <div class="preview-item"><span class="preview-label">مستوى خبرة المستخدمين</span><span class="preview-value">${getSelectText('userExperience')}</span></div>
+                <div class="preview-item"><span class="preview-label">نوع التدريب المطلوب</span><span class="preview-value">${getSelectText('trainingType')}</span></div>
+                <div class="preview-item"><span class="preview-label">مدة التدريب المقترحة</span><span class="preview-value">${getSelectText('trainingDuration')}</span></div>
+                <div class="preview-item"><span class="preview-label">مستوى الدعم الفني</span><span class="preview-value">${getSelectText('supportLevel')}</span></div></div>
+                
+                <div class="preview-card"><h4 style="color: #1e4a3b;"><i class="fas fa-globe me-2"></i>احتياجات وصول وتواجد المستخدمين</h4>
+                <div class="preview-item"><span class="preview-label">طريقة الوصول المطلوبة</span><span class="preview-value">${getSelectText('accessMethod')}</span></div>
+                <div class="preview-item"><span class="preview-label">عدد الفروع أو المواقع</span><span class="preview-value">${getFieldValue('branchesCount')}</span></div>
+                <div class="preview-item"><span class="preview-label">مواقع المستخدمين</span><span class="preview-value">${getFieldValue('userLocations')}</span></div>
+                <div class="preview-item"><span class="preview-label">دوام العمل</span><span class="preview-value">${getSelectText('workShift')}</span></div></div>
+                
+                <div class="preview-card"><h4 style="color: #1e4a3b;"><i class="fas fa-plus-circle me-2"></i>مجموعات مستخدمين إضافية</h4>${getUserGroupsList()}</div>
+                
+                <div class="preview-card"><h4 style="color: #1e4a3b;"><i class="fas fa-info-circle me-2"></i>معلومات إضافية</h4>
+                <div class="preview-item"><span class="preview-label">ملاحظات</span><span class="preview-value">${getFieldValue('additionalInfo')}</span></div></div>
+                
+                <div class="preview-card text-center"><hr><p style="color: #1e4a3b; font-weight: 600;"><i class="fas fa-check-circle me-2"></i>تم تعبئة استبيان حجم المستخدمين بنجاح</p><p class="text-muted small">تاريخ الإصدار: ${new Date().toLocaleDateString('ar-EG')}</p></div>
+            `;
+            document.getElementById('previewContent').innerHTML = previewHtml;
+        }
+        
+        function resetForm() { 
+            if(confirm('هل أنت متأكد من إعادة تعيين جميع البيانات؟')) location.reload(); 
+        }
+        
+        function exportToExcel() {
+            const companyName = getFieldValue('companyName', 'منشأة');
+            const userTypesList = getUserTypesList();
+            
+            const excelData = [
+                ['استبيان حجم المستخدمين', 'خدمة حلول ERP المبسطة'],
+                ['تاريخ التقرير', new Date().toLocaleDateString('ar-EG')],
+                ['اسم المنشأة', companyName],
+                ['المسؤول', getFieldValue('contactPerson')],
+                [],
+                ['1. بيانات المنشأة'],
+                ['اسم المنشأة', getFieldValue('companyName')], ['النشاط الرئيسي', getFieldValue('businessActivity')],
+                ['حجم المنشأة', getSelectText('companySize')], ['المسؤول', getFieldValue('contactPerson')],
+                ['المسمى الوظيفي', getFieldValue('jobTitle')], ['البريد الإلكتروني', getFieldValue('clientEmail')],
+                ['رقم الهاتف', getFieldValue('clientPhone')], [],
+                ['2. إجمالي عدد المستخدمين'],
+                ['إجمالي المستخدمين المتوقع', getFieldValue('totalUsers')], ['الحد الأقصى المتزامن', getFieldValue('concurrentUsers')],
+                ['مستخدمي السنة الأولى', getFieldValue('firstYearUsers')], ['نمو المستخدمين السنوي (%)', getFieldValue('userGrowth')], [],
+                ['3. توزيع المستخدمين حسب الإدارات'],
+                ['الإدارة المالية', getNumberValue('deptFinance')], ['المشتريات', getNumberValue('deptPurchases')],
+                ['المبيعات', getNumberValue('deptSales')], ['المخزون', getNumberValue('deptInventory')],
+                ['الموارد البشرية', getNumberValue('deptHR')], ['الإنتاج', getNumberValue('deptProduction')],
+                ['تقنية المعلومات', getNumberValue('deptIT')], ['إدارة المشاريع', getNumberValue('deptProjects')],
+                ['الإدارة العليا', getNumberValue('deptManagement')], ['إدارات أخرى', getFieldValue('otherDepartments')], [],
+                ['4. مستويات الصلاحيات'],
+                ['أنواع المستخدمين', userTypesList], ['صلاحيات إضافية', getFieldValue('additionalPermissions')], [],
+                ['5. التدريب والدعم'],
+                ['مستوى خبرة المستخدمين', getSelectText('userExperience')], ['نوع التدريب', getSelectText('trainingType')],
+                ['مدة التدريب', getSelectText('trainingDuration')], ['مستوى الدعم', getSelectText('supportLevel')], [],
+                ['6. وصول وتواجد المستخدمين'],
+                ['طريقة الوصول', getSelectText('accessMethod')], ['عدد الفروع', getFieldValue('branchesCount')],
+                ['مواقع المستخدمين', getFieldValue('userLocations')], ['دوام العمل', getSelectText('workShift')], [],
+                ['7. معلومات إضافية'], ['ملاحظات', getFieldValue('additionalInfo')], [],
+                ['للتواصل: info@takalief.com | +20 104 439 1177'], ['www.takalief.com']
+            ];
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.aoa_to_sheet(excelData);
+            XLSX.utils.book_append_sheet(wb, ws, 'حجم_المستخدمين');
+            XLSX.writeFile(wb, `User_Volume_${companyName.replace(/\s/g, '_')}_${new Date().toISOString().slice(0,10)}.xlsx`);
+            alert('تم تصدير استبيان Excel بنجاح');
+        }
+        
+        async function exportToPDF(event) {
+            try {
+                const exportBtn = event.target;
+                const originalText = exportBtn.innerHTML;
+                exportBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> جاري إعداد التقرير...';
+                exportBtn.disabled = true;
+                
+                const pdfContainer = document.getElementById('pdf-export-container');
+                pdfContainer.innerHTML = '';
+                pdfContainer.style.opacity = '1';
+                pdfContainer.style.position = 'absolute';
+                pdfContainer.style.top = '0';
+                pdfContainer.style.left = '0';
+                pdfContainer.style.zIndex = '9999';
+                
+                const companyName = getFieldValue('companyName', 'غير محدد');
+                const contactPerson = getFieldValue('contactPerson', 'غير محدد');
+                const currentDate = new Date().toLocaleDateString('ar-EG');
+                const userTypesList = getUserTypesList();
+                
+                let userGroupsRows = '';
+                for (let i = 1; i <= userGroupCount; i++) {
+                    const nameElem = document.getElementById(`groupName${i}`);
+                    const name = nameElem ? nameElem.value : '';
+                    if (name) {
+                        const count = document.getElementById(`groupCount${i}`) ? document.getElementById(`groupCount${i}`).value : '';
+                        const access = document.getElementById(`groupAccess${i}`) ? document.getElementById(`groupAccess${i}`).options[document.getElementById(`groupAccess${i}`).selectedIndex]?.text : '';
+                        const modules = document.getElementById(`groupModules${i}`) ? document.getElementById(`groupModules${i}`).value : '';
+                        userGroupsRows += ` Bon<td style="text-align:right;">${name} Bon<td style="text-align:center;">${count || '—'} Bon<td style="text-align:center;">${access || '—'} Bon<td style="text-align:right;">${modules || '—'} Bon</tr>`;
+                    }
+                }
+                
+                const pdfWrapper = document.createElement('div');
+                pdfWrapper.className = 'pdf-wrapper';
+                pdfWrapper.innerHTML = `
+                    <div class="pdf-cover">
+                        <h1>استبيان حجم المستخدمين</h1>
+                        <h3>خدمة حلول ERP المبسطة</h3>
+                        <div style="background: rgba(255,255,255,0.1); border-radius: 15px; padding: 20px; margin-top: 30px; border: 2px solid #52b788;">
+                            <p style="font-size: 18px;"><i class="fas fa-building me-2"></i>المنشأة: ${companyName}</p>
+                            <p style="font-size: 16px;"><i class="fas fa-user me-2"></i>المسؤول: ${contactPerson}</p>
+                            <p style="font-size: 16px;"><i class="fas fa-calendar me-2"></i>تاريخ التقرير: ${currentDate}</p>
+                        </div>
+                    </div>
+                    
+                    <div style="page-break-before: always;">
+                        <h2 class="pdf-section-title">بيانات المنشأة</h2>
+                        <table class="pdf-table">\n                            <tr><th style="width: 35%;">البيان</th><th>القيمة</th></tr>
+                            <tr><td style="text-align:right;">اسم المنشأة</td><td>${getFieldValue('companyName')}</td></tr>
+                            <tr><td style="text-align:right;">النشاط الرئيسي</td><td>${getFieldValue('businessActivity')}</td></tr>
+                            <tr><td style="text-align:right;">حجم المنشأة</td><td>${getSelectText('companySize')}</td></tr>
+                            <tr><td style="text-align:right;">المسؤول</td><td>${getFieldValue('contactPerson')}</td></tr>
+                            <tr><td style="text-align:right;">المسمى الوظيفي</td><td>${getFieldValue('jobTitle')}</td></tr>
+                            <tr><td style="text-align:right;">البريد الإلكتروني</td><td>${getFieldValue('clientEmail')}</td></tr>
+                            <tr><td style="text-align:right;">رقم الهاتف</td><td>${getFieldValue('clientPhone')}</td></tr>
+                        </table>
+                        
+                        <h2 class="pdf-section-title">إجمالي عدد المستخدمين</h2>
+                        <table class="pdf-table">\n                            <tr><th style="width: 35%;">البيان</th><th>القيمة</th></tr>
+                            <tr><td style="text-align:right;">إجمالي المستخدمين المتوقع</td><td>${getFieldValue('totalUsers')}</td></tr>
+                            <tr><td style="text-align:right;">الحد الأقصى المتزامن</td><td>${getFieldValue('concurrentUsers')}</td></tr>
+                            <tr><td style="text-align:right;">مستخدمي السنة الأولى</td><td>${getFieldValue('firstYearUsers')}</td></tr>
+                            <tr><td style="text-align:right;">نمو المستخدمين السنوي</td><td>${getFieldValue('userGrowth')}%</td></tr>
+                        </table>
+                        
+                        <h2 class="pdf-section-title">توزيع المستخدمين حسب الإدارات</h2>
+                        <table class="pdf-table">\n                            <tr><th style="width: 35%;">الإدارة</th><th>عدد المستخدمين</th></tr>
+                            <tr><td style="text-align:right;">الإدارة المالية والمحاسبة</td><td>${getNumberValue('deptFinance')}</td></tr>
+                            <tr><td style="text-align:right;">المشتريات والموردين</td><td>${getNumberValue('deptPurchases')}</td></tr>
+                            <tr><td style="text-align:right;">المبيعات والعملاء</td><td>${getNumberValue('deptSales')}</td></tr>
+                            <tr><td style="text-align:right;">المخزون والمستودعات</td><td>${getNumberValue('deptInventory')}</td></tr>
+                            <tr><td style="text-align:right;">الموارد البشرية</td><td>${getNumberValue('deptHR')}</td></tr>
+                            <tr><td style="text-align:right;">الإنتاج والتصنيع</td><td>${getNumberValue('deptProduction')}</td></tr>
+                            <tr><td style="text-align:right;">تقنية المعلومات</td><td>${getNumberValue('deptIT')}</td></tr>
+                            <tr><td style="text-align:right;">إدارة المشاريع</td><td>${getNumberValue('deptProjects')}</td></tr>
+                            <tr><td style="text-align:right;">الإدارة العليا</td><td>${getNumberValue('deptManagement')}</td></tr>
+                            <tr><td style="text-align:right;">إدارات أخرى</td><td>${getFieldValue('otherDepartments')}</td></tr>
+                        </table>
+                        
+                        <h2 class="pdf-section-title">مستويات الصلاحيات</h2>
+                        <table class="pdf-table">\n                            <tr><th style="width: 35%;">البيان</th><th>القيمة</th></tr>
+                            <tr><td style="text-align:right;">أنواع المستخدمين</td><td>${userTypesList}</td></tr>
+                            <tr><td style="text-align:right;">متطلبات صلاحيات إضافية</td><td>${getFieldValue('additionalPermissions')}</td></tr>
+                        </table>
+                        
+                        <h2 class="pdf-section-title">احتياجات التدريب والدعم</h2>
+                        <table class="pdf-table">\n                            <tr><th style="width: 35%;">البيان</th><th>القيمة</th></tr>
+                            <tr><td style="text-align:right;">مستوى خبرة المستخدمين</td><td>${getSelectText('userExperience')}</td></tr>
+                            <tr><td style="text-align:right;">نوع التدريب المطلوب</td><td>${getSelectText('trainingType')}</td></tr>
+                            <tr><td style="text-align:right;">مدة التدريب المقترحة</td><td>${getSelectText('trainingDuration')}</td></tr>
+                            <tr><td style="text-align:right;">مستوى الدعم الفني</td><td>${getSelectText('supportLevel')}</td></tr>
+                        </table>
+                        
+                        <h2 class="pdf-section-title">احتياجات وصول وتواجد المستخدمين</h2>
+                        <table class="pdf-table">\n                            <tr><th style="width: 35%;">البيان</th><th>القيمة</th></tr>
+                            <tr><td style="text-align:right;">طريقة الوصول المطلوبة</td><td>${getSelectText('accessMethod')}</td></tr>
+                            <tr><td style="text-align:right;">عدد الفروع أو المواقع</td><td>${getFieldValue('branchesCount')}</td></tr>
+                            <tr><td style="text-align:right;">مواقع المستخدمين</td><td>${getFieldValue('userLocations')}</td></tr>
+                            <tr><td style="text-align:right;">دوام العمل</td><td>${getSelectText('workShift')}</td></tr>
+                        </table>
+                        
+                        <h2 class="pdf-section-title">مجموعات مستخدمين إضافية</h2>
+                        <table class="pdf-table">\n                            <tr><th>اسم المجموعة</th><th>عدد المستخدمين</th><th>مستوى الوصول</th><th>الوحدات المطلوبة</th></tr>
+                            ${userGroupsRows || '<tr><td colspan="4" style="text-align:center;">لا توجد مجموعات مستخدمين مضافة</td></tr>'}
+                        </table>
+                        
+                        <h2 class="pdf-section-title">معلومات إضافية</h2>
+                        <table class="pdf-table">\n                            <tr><th style="width: 35%;">البيان</th><th>القيمة</th></tr>
+                            <tr><td style="text-align:right;">ملاحظات</td><td>${getFieldValue('additionalInfo')}</td></tr>
+                        </table>
+                    </div>
+                    
+                    <div style="page-break-before: always; margin-top: 40px;">
+                        <div class="pdf-footer">
+                            <div style="font-size: 20px; font-weight: 700; color: #52b788;">تكاليف - حلول أعمال ذكية</div>
+                            <div>القاهرة - مصر | +20 104 439 1177 | info@takalief.com</div>
+                            <hr style="width: 150px; margin: 15px auto; border: 1px solid #52b788;">
+                            <p>تم تعبئة هذا الاستبيان لتحليل حجم المستخدمين لخدمة ERP المبسطة</p>
+                            <p>تاريخ الإصدار: ${currentDate}</p>
+                            <p style="margin-top: 20px;">توقيع المسؤول: _________________________</p>
+                            <p>جميع الحقوق محفوظة © 2026</p>
+                        </div>
+                    </div>
+                `;
+                
+                pdfContainer.appendChild(pdfWrapper);
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                
+                const canvas = await html2canvas(pdfContainer, { scale: 2, backgroundColor: '#ffffff', logging: false, useCORS: true });
+                const { jsPDF } = window.jspdf;
+                const imgData = canvas.toDataURL('image/png');
+                const imgWidth = 210;
+                const pageHeight = 297;
+                const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                let heightLeft = imgHeight;
+                let position = 0;
+                
+                const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+                pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight, undefined, 'FAST');
+                heightLeft -= pageHeight;
+                while (heightLeft > 0) {
+                    position = heightLeft - imgHeight;
+                    pdf.addPage();
+                    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight, undefined, 'FAST');
+                    heightLeft -= pageHeight;
+                }
+                
+                pdf.save(`User_Volume_${companyName.replace(/[^\u0600-\u06FFa-zA-Z0-9]/g, '_')}_${new Date().toISOString().slice(0,10)}.pdf`);
+                
+                pdfContainer.innerHTML = '';
+                pdfContainer.style.opacity = '0';
+                pdfContainer.style.position = 'fixed';
+                pdfContainer.style.top = '-99999px';
+                
+                exportBtn.innerHTML = originalText;
+                exportBtn.disabled = false;
+                alert('تم تصدير التقرير بنجاح');
+            } catch (error) {
+                console.error('PDF Error:', error);
+                alert('حدث خطأ: ' + error.message);
+                const exportBtn = event.target;
+                exportBtn.innerHTML = '<i class="fas fa-file-pdf me-2"></i> تصدير التقرير (PDF)';
+                exportBtn.disabled = false;
+            }
+        }
+        
+        function init() {
+            const container = document.getElementById('userGroupsContainer');
+            container.innerHTML = '';
+            const firstGroup = document.createElement('div');
+            firstGroup.className = 'user-group-item';
+            firstGroup.id = 'userGroup-1';
+            firstGroup.innerHTML = `
+                <div class="row mb-2">
+                    <div class="col-md-4">
+                        <input type="text" class="form-control" placeholder="اسم المجموعة / الإدارة" id="groupName1">
+                    </div>
+                    <div class="col-md-3">
+                        <input type="number" class="form-control" placeholder="عدد المستخدمين" id="groupCount1">
+                    </div>
+                    <div class="col-md-4">
+                        <select class="form-select" id="groupAccess1">
+                            <option value="">مستوى الوصول</option>
+                            <option value="صلاحيات كاملة">صلاحيات كاملة</option>
+                            <option value="صلاحيات متوسطة">صلاحيات متوسطة</option>
+                            <option value="صلاحيات محدودة">صلاحيات محدودة</option>
+                            <option value="عرض فقط">عرض فقط</option>
+                        </select>
+                    </div>
+                    <div class="col-md-1">
+                        <button class="btn btn-danger btn-sm" onclick="removeUserGroup(1)" style="display:none;"><i class="fas fa-trash"></i></button>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <textarea class="form-control" rows="2" placeholder="الوحدات الوظيفية التي يحتاجها这群 المستخدمين" id="groupModules1"></textarea>
+                    </div>
+                </div>
+            `;
+            container.appendChild(firstGroup);
+            userGroupCount = 1;
+            
+            refreshPreview();
+            const today = new Date().toISOString().split('T')[0];
+            if (document.getElementById('submissionDate')) document.getElementById('submissionDate').value = today;
+        }
+        
+        window.onload = init;
+    </script>
+</body>
+</html>
